@@ -1,10 +1,29 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Lotus } from "./components/Icon";
 
 export const metadata: Metadata = {
   title: "회원권 계산기",
   description: "아쉬탕가 요가 스튜디오 회원권 환불 및 전환 계산 도구",
+  applicationName: "ASHTANGA Membership",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ASHTANGA Membership",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#071F24",
 };
 
 export default function RootLayout({
