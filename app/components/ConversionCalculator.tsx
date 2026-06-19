@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { parseLocalDate, daysBetweenInclusive, formatWon } from "./utils";
+import { parseLocalDate, daysBetweenInclusive, formatWon, parseMoneyInput } from "./utils";
 import { Calendar } from "./Icon";
 
 export default function ConversionCalculator() {
@@ -72,11 +72,11 @@ export default function ConversionCalculator() {
             <div className="grid grid-cols-2 gap-3">
               <label>
                 <div className="text-xs text-zinc-600">일반회원 실결제액</div>
-                <input value={paid} onChange={(e) => setPaid(Number(e.target.value))} type="number" className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+                <input value={paid} onChange={(e) => setPaid(parseMoneyInput(e.target.value))} type="number" min="0" className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
               </label>
               <label>
                 <div className="text-xs text-zinc-600">마이솔 기준가</div>
-                <input value={mysolPrice} onChange={(e) => setMysolPrice(Number(e.target.value))} type="number" className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+                <input value={mysolPrice} onChange={(e) => setMysolPrice(parseMoneyInput(e.target.value))} type="number" min="0" className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
               </label>
             </div>
 
