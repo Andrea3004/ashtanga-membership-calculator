@@ -45,10 +45,13 @@ export default function RefundCalculator() {
     const totalDays = daysBetweenInclusive(s, e);
     const usedDays = daysBetweenInclusive(s, r);
     const remainingDays = daysBetweenExclusive(r, e);
-    const perDay = paid / totalDays;
+    const perDay = fullPrice / totalDays;
     const usedAmount = perDay * usedDays;
     const penalty = (paid * penaltyRate) / 100;
-    const final = Math.max(0, paid - usedAmount - penalty - cardFee);
+    const final = Math.max(
+      0,
+      Math.floor(paid - usedAmount - penalty - cardFee),
+    );
 
     return {
       totalDays,
@@ -59,7 +62,7 @@ export default function RefundCalculator() {
       penalty,
       final,
     };
-  }, [start, end, request, paid, penaltyRate, cardFee]);
+  }, [start, end, request, fullPrice, paid, penaltyRate, cardFee]);
 
   function calculateEndDate(nextStart: string, nextPeriod: MembershipPeriod) {
     if (!nextStart || nextPeriod === "직접 입력") return;
@@ -226,11 +229,11 @@ export default function RefundCalculator() {
                   <div className="font-medium">{computed ? computed.remainingDays : "-"}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-zinc-600">1일 단가</div>
+                  <div className="text-xs text-zinc-600">정상가 기준 1일 단가</div>
                   <div className="font-medium">{computed ? formatWon(computed.perDay) : "-"}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-zinc-600">이용금액</div>
+                  <div className="text-xs text-zinc-600">정상가 기준 이용금액</div>
                   <div className="font-medium">{computed ? formatWon(computed.usedAmount) : "-"}</div>
                 </div>
                 <div>
