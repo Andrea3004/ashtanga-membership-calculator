@@ -1,6 +1,6 @@
 {
   "name": "ASHTANGA Membership Calculator",
-  "short_name": "ASHTANGA Membership",
+  "short_name": "Studio Calc",
   "description": "ASHTANGA YOGA STUDIO 회원권 환불 및 전환 계산기",
   "start_url": "/",
   "display": "standalone",
