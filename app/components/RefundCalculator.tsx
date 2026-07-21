@@ -219,7 +219,7 @@ export default function RefundCalculator() {
               <label>
                 <div>정상가</div>
                 <input
-                  value={fullPrice}
+                  value={fullPrice || ""}
                   onChange={(event) =>
                     setFullPrice(parseMoneyInput(event.target.value))
                   }
@@ -230,7 +230,7 @@ export default function RefundCalculator() {
               <label>
                 <div>실결제액</div>
                 <input
-                  value={paid}
+                  value={paid || ""}
                   onChange={(event) => setPaid(parseMoneyInput(event.target.value))}
                   type="number"
                   min="0"
