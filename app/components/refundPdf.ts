@@ -25,22 +25,34 @@ export async function downloadRefundPdf(item: RefundHistoryItem) {
   ]);
 
   const issuedAt = new Date().toLocaleString("ko-KR");
-  const rows = [
-    ["회원 이름", item.name || "-"],
-    ["회원권 기간 유형", item.periodType],
-    ["수련 시작일", item.startDate || "-"],
-    ["수련 만료일", item.endDate || "-"],
-    ["환불 요청일", item.requestDate || "-"],
-    ["정상가", formatWon(item.fullPrice)],
-    ["실결제액", formatWon(item.paid)],
-    ["전체 등록일수", `${item.totalDays}일`],
-    ["이용일수", `${item.usedDays}일`],
-    ["잔여일수", `${item.remainingDays}일`],
-    ["정상가 기준 1일 단가", formatWon(item.perDay)],
-    ["정상가 기준 이용금액", formatWon(item.usedAmount)],
-    ["위약금", formatWon(item.penalty)],
-    ["카드수수료", formatWon(item.cardFee)],
-    ["저장일시", item.savedAt || "-"],
+  const originalEndDate = item.originalEndDate || item.endDate || "-";
+  const adjustedEndDate = item.adjustedEndDate || item.endDate || "-";
+  const holdingDays = Math.max(0, item.holdingDays || 0);
+  const holdingLabel = holdingDays > 0 ? `${holdingDays}일` : "없음";
+  const rows: Array<
+    | { type: "section"; label: string }
+    | { type?: "row"; label: string; value: string }
+  > = [
+    { type: "section", label: "회원권 정보" },
+    { label: "회원 이름", value: item.name || "-" },
+    { label: "회원권 기간", value: item.periodType },
+    { label: "수련 시작일", value: item.startDate || "-" },
+    { label: "최초 만료일", value: originalEndDate },
+    { label: "홀딩기간", value: holdingLabel },
+    { label: "홀딩 반영 만료일", value: adjustedEndDate },
+    { label: "환불 요청일", value: item.requestDate || "-" },
+    { type: "section", label: "계산 기준" },
+    { label: "원래 전체 등록일수", value: `${item.totalDays}일` },
+    { label: "정상가 기준 1일 단가", value: formatWon(item.perDay) },
+    { label: "실제 이용일수", value: `${item.usedDays}일` },
+    { label: "잔여일수", value: `${item.remainingDays}일` },
+    { type: "section", label: "환불 금액" },
+    { label: "정상가", value: formatWon(item.fullPrice) },
+    { label: "실결제액", value: formatWon(item.paid) },
+    { label: "정상가 기준 이용금액", value: formatWon(item.usedAmount) },
+    { label: "위약금", value: formatWon(item.penalty) },
+    { label: "카드수수료", value: formatWon(item.cardFee) },
+    { label: "저장일시", value: item.savedAt || "-" },
   ];
 
   const documentElement = document.createElement("div");
@@ -67,19 +79,28 @@ export async function downloadRefundPdf(item: RefundHistoryItem) {
     <div style="margin-top:17px;padding:14px 16px;border:1px solid #eadde0;border-radius:8px;background:#fff9fa;color:#574f51;font-size:11px;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere;">
       <p style="margin:0 0 6px;">본 환불 계산서는 공정거래위원회 소비자분쟁해결기준 및 ASHTANGA YOGA STUDIO 환불 규정에 따라 산정된 참고용 계산서입니다.</p>
       <p style="margin:0 0 6px;">환불 금액은 회원권 계약 내용, 이용 내역 및 환불 규정에 따라 산정되었으며, 최종 환불 금액은 확인 절차를 거쳐 확정될 수 있습니다.</p>
-      <p style="margin:0;">본 문서는 회원권 기간, 이용 내역, 환불 산정 기준을 함께 확인할 수 있도록 작성되었습니다.</p>
+      <p style="margin:0 0 6px;">본 문서는 회원권 기간, 이용 내역, 환불 산정 기준을 함께 확인할 수 있도록 작성되었습니다.</p>
+      <p style="margin:0;">홀딩기간은 회원권 만료일에 반영되며, 정상가 기준 1일 단가 산정을 위한 전체 등록일수에는 포함되지 않습니다.</p>
     </div>
     <table style="width:100%;margin-top:16px;border-collapse:collapse;table-layout:fixed;font-size:11px;">
       <tbody>
         ${rows
-          .map(
-            ([label, value]) => `
+          .map((row) =>
+            row.type === "section"
+              ? `
+              <tr>
+                <th colspan="2" style="padding:8px 12px;border-bottom:1px solid #eee7e9;background:#f8eef1;color:#9f5968;text-align:left;font-weight:800;word-break:keep-all;">
+                  ${escapeHtml(row.label)}
+                </th>
+              </tr>
+            `
+              : `
               <tr>
                 <th style="width:37%;padding:7px 12px;border-bottom:1px solid #eee7e9;background:#fcfafb;color:#675d60;text-align:left;font-weight:700;word-break:keep-all;">
-                  ${escapeHtml(label)}
+                  ${escapeHtml(row.label)}
                 </th>
                 <td style="padding:7px 12px;border-bottom:1px solid #eee7e9;color:#292124;text-align:left;font-weight:600;word-break:break-word;">
-                  ${escapeHtml(value)}
+                  ${escapeHtml(row.value)}
                 </td>
               </tr>
             `,

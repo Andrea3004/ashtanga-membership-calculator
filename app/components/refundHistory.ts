@@ -12,6 +12,9 @@ export type RefundHistoryItem = {
   penaltyRate: number;
   cardFee: number;
   totalDays: number;
+  originalEndDate: string;
+  holdingDays: number;
+  adjustedEndDate: string;
   usedDays: number;
   remainingDays: number;
   perDay: number;
@@ -44,19 +47,25 @@ export function normalizeRefundHistoryItem(
 ): RefundHistoryItem | null {
   if (!value || typeof value !== "object") return null;
   const item = value as Record<string, unknown>;
+  const endDate = asString(item.endDate);
+  const originalEndDate = asString(item.originalEndDate) || endDate;
+  const adjustedEndDate = asString(item.adjustedEndDate) || endDate;
 
   return {
     id: asString(item.id) || `legacy-${index}-${Date.now()}`,
     name: asString(item.name),
     periodType: asPeriod(item.periodType),
     startDate: asString(item.startDate),
-    endDate: asString(item.endDate),
+    endDate,
     requestDate: asString(item.requestDate),
     fullPrice: asNumber(item.fullPrice),
     paid: asNumber(item.paid),
     penaltyRate: item.penaltyRate === undefined ? 10 : asNumber(item.penaltyRate),
     cardFee: asNumber(item.cardFee),
     totalDays: asNumber(item.totalDays),
+    originalEndDate,
+    holdingDays: Math.max(0, asNumber(item.holdingDays)),
+    adjustedEndDate,
     usedDays: asNumber(item.usedDays),
     remainingDays: asNumber(item.remainingDays),
     perDay: asNumber(item.perDay),

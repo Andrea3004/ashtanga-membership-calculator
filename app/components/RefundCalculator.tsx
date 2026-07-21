@@ -42,9 +42,20 @@ export default function RefundCalculator() {
     const r = parseLocalDate(request);
     if (!s || !e || !r) return null;
 
-    const totalDays = daysBetweenInclusive(s, e);
-    const usedDays = daysBetweenInclusive(s, r);
-    const remainingDays = daysBetweenExclusive(r, e);
+    const totalDays =
+      periodType === "직접 입력" ? daysBetweenInclusive(s, e) : PERIOD_DAYS[periodType];
+    const originalEndDate =
+      periodType === "직접 입력"
+        ? end
+        : addDaysToDateString(start, PERIOD_DAYS[periodType] - 1);
+    const originalEnd = parseLocalDate(originalEndDate);
+    const holdingDays = originalEnd
+      ? Math.max(0, daysBetweenExclusive(originalEnd, e))
+      : 0;
+    const adjustedEndDate = end;
+    const calculatedRemainingDays = Math.max(0, daysBetweenExclusive(r, e));
+    const remainingDays = Math.min(totalDays, calculatedRemainingDays);
+    const usedDays = Math.max(0, totalDays - remainingDays);
     const perDay = fullPrice / totalDays;
     const usedAmount = perDay * usedDays;
     const penalty = (paid * penaltyRate) / 100;
@@ -55,6 +66,9 @@ export default function RefundCalculator() {
 
     return {
       totalDays,
+      originalEndDate,
+      holdingDays,
+      adjustedEndDate,
       usedDays,
       remainingDays,
       perDay,
@@ -62,7 +76,7 @@ export default function RefundCalculator() {
       penalty,
       final,
     };
-  }, [start, end, request, fullPrice, paid, penaltyRate, cardFee]);
+  }, [periodType, start, end, request, fullPrice, paid, penaltyRate, cardFee]);
 
   function calculateEndDate(nextStart: string, nextPeriod: MembershipPeriod) {
     if (!nextStart || nextPeriod === "직접 입력") return;
@@ -94,6 +108,9 @@ export default function RefundCalculator() {
       penaltyRate,
       cardFee,
       totalDays: computed.totalDays,
+      originalEndDate: computed.originalEndDate,
+      holdingDays: computed.holdingDays,
+      adjustedEndDate: computed.adjustedEndDate,
       usedDays: computed.usedDays,
       remainingDays: computed.remainingDays,
       perDay: computed.perDay,
@@ -226,8 +243,11 @@ export default function RefundCalculator() {
                 <div>위약금 비율 (%)</div>
                 <input
                   value={penaltyRate}
-                  onChange={(event) => setPenaltyRate(Number(event.target.value))}
+                  onChange={(event) =>
+                    setPenaltyRate(Math.max(0, Number(event.target.value)))
+                  }
                   type="number"
+                  min="0"
                 />
               </label>
               <label>
@@ -262,6 +282,32 @@ export default function RefundCalculator() {
                 <div>
                   <div className="result-label">전체 등록일수</div>
                   <div className="font-medium">{computed ? computed.totalDays : "-"}</div>
+                </div>
+                <div>
+                  <div className="result-label">원래 전체 등록일수</div>
+                  <div className="font-medium">{computed ? computed.totalDays : "-"}</div>
+                </div>
+                <div>
+                  <div className="result-label">최초 만료일</div>
+                  <div className="font-medium">
+                    {computed ? computed.originalEndDate || "-" : "-"}
+                  </div>
+                </div>
+                <div>
+                  <div className="result-label">홀딩기간</div>
+                  <div className="font-medium">
+                    {computed
+                      ? computed.holdingDays > 0
+                        ? `${computed.holdingDays}일`
+                        : "없음"
+                      : "-"}
+                  </div>
+                </div>
+                <div>
+                  <div className="result-label">홀딩 반영 만료일</div>
+                  <div className="font-medium">
+                    {computed ? computed.adjustedEndDate || "-" : "-"}
+                  </div>
                 </div>
                 <div>
                   <div className="result-label">이용일수</div>
