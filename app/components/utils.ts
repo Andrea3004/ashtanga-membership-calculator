@@ -39,6 +39,30 @@ export function addDaysToDateString(dateStr: string, days: number) {
   const date = parseLocalDate(dateStr);
   if (!date) return "";
   date.setDate(date.getDate() + days);
+  return formatLocalDate(date);
+}
+
+export function addMonthsMinusOneDay(dateStr: string, months: number) {
+  const date = parseLocalDate(dateStr);
+  if (!date) return "";
+
+  const originalDay = date.getDate();
+  const targetMonth = date.getMonth() + months;
+  const lastDayOfTargetMonth = new Date(
+    date.getFullYear(),
+    targetMonth + 1,
+    0,
+  ).getDate();
+
+  date.setDate(1);
+  date.setMonth(targetMonth);
+  date.setDate(Math.min(originalDay, lastDayOfTargetMonth));
+  date.setDate(date.getDate() - 1);
+
+  return formatLocalDate(date);
+}
+
+function formatLocalDate(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");

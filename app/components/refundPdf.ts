@@ -37,21 +37,21 @@ export async function downloadRefundPdf(item: RefundHistoryItem) {
     { label: "회원 이름", value: item.name || "-" },
     { label: "회원권 기간", value: item.periodType },
     { label: "수련 시작일", value: item.startDate || "-" },
-    { label: "최초 만료일", value: originalEndDate },
-    { label: "홀딩기간", value: holdingLabel },
-    { label: "홀딩 반영 만료일", value: adjustedEndDate },
+    { label: "원래 만료일", value: originalEndDate },
+    { label: "조정 만료일", value: adjustedEndDate },
+    { label: "홀딩일수", value: holdingLabel },
     { label: "환불 요청일", value: item.requestDate || "-" },
     { type: "section", label: "계산 기준" },
     { label: "원래 전체 등록일수", value: `${item.totalDays}일` },
-    { label: "정상가 기준 1일 단가", value: formatWon(item.perDay) },
     { label: "실제 이용일수", value: `${item.usedDays}일` },
     { label: "잔여일수", value: `${item.remainingDays}일` },
+    { label: "실결제액 기준 1일 단가", value: formatWon(item.perDay) },
     { type: "section", label: "환불 금액" },
-    { label: "정상가", value: formatWon(item.fullPrice) },
     { label: "실결제액", value: formatWon(item.paid) },
-    { label: "정상가 기준 이용금액", value: formatWon(item.usedAmount) },
+    { label: "이용금액", value: formatWon(item.usedAmount) },
     { label: "위약금", value: formatWon(item.penalty) },
     { label: "카드수수료", value: formatWon(item.cardFee) },
+    { label: "환불금", value: formatWonFloor(item.refund) },
     { label: "저장일시", value: item.savedAt || "-" },
   ];
 
@@ -80,7 +80,7 @@ export async function downloadRefundPdf(item: RefundHistoryItem) {
       <p style="margin:0 0 6px;">본 환불 계산서는 공정거래위원회 소비자분쟁해결기준 및 ASHTANGA YOGA STUDIO 환불 규정에 따라 산정된 참고용 계산서입니다.</p>
       <p style="margin:0 0 6px;">환불 금액은 회원권 계약 내용, 이용 내역 및 환불 규정에 따라 산정되었으며, 최종 환불 금액은 확인 절차를 거쳐 확정될 수 있습니다.</p>
       <p style="margin:0 0 6px;">본 문서는 회원권 기간, 이용 내역, 환불 산정 기준을 함께 확인할 수 있도록 작성되었습니다.</p>
-      <p style="margin:0;">홀딩기간은 회원권 만료일에 반영되며, 정상가 기준 1일 단가 산정을 위한 전체 등록일수에는 포함되지 않습니다.</p>
+      <p style="margin:0;">홀딩기간은 회원권 만료일에 반영되며, 1일 단가 산정을 위한 전체 등록일수에는 포함되지 않습니다.</p>
     </div>
     <table style="width:100%;margin-top:16px;border-collapse:collapse;table-layout:fixed;font-size:11px;">
       <tbody>

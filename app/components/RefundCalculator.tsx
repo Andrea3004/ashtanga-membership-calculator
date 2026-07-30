@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
-  addDaysToDateString,
+  addMonthsMinusOneDay,
   daysBetweenExclusive,
   daysBetweenInclusive,
   formatWon,
@@ -23,6 +23,13 @@ const PERIOD_DAYS: Record<Exclude<MembershipPeriod, "직접 입력">, number> = 
   "3개월": 90,
   "6개월": 180,
   "12개월": 365,
+};
+
+const PERIOD_MONTHS: Record<Exclude<MembershipPeriod, "직접 입력">, number> = {
+  "1개월": 1,
+  "3개월": 3,
+  "6개월": 6,
+  "12개월": 12,
 };
 
 export default function RefundCalculator() {
@@ -47,7 +54,7 @@ export default function RefundCalculator() {
     const originalEndDate =
       periodType === "직접 입력"
         ? end
-        : addDaysToDateString(start, PERIOD_DAYS[periodType] - 1);
+        : addMonthsMinusOneDay(start, PERIOD_MONTHS[periodType]);
     const originalEnd = parseLocalDate(originalEndDate);
     const holdingDays = originalEnd
       ? Math.max(0, daysBetweenExclusive(originalEnd, e))
@@ -56,7 +63,7 @@ export default function RefundCalculator() {
     const calculatedRemainingDays = Math.max(0, daysBetweenExclusive(r, e));
     const remainingDays = Math.min(totalDays, calculatedRemainingDays);
     const usedDays = Math.max(0, totalDays - remainingDays);
-    const perDay = fullPrice / totalDays;
+    const perDay = paid / totalDays;
     const usedAmount = perDay * usedDays;
     const penalty = (paid * penaltyRate) / 100;
     const final = Math.max(
@@ -76,11 +83,11 @@ export default function RefundCalculator() {
       penalty,
       final,
     };
-  }, [periodType, start, end, request, fullPrice, paid, penaltyRate, cardFee]);
+  }, [periodType, start, end, request, paid, penaltyRate, cardFee]);
 
   function calculateEndDate(nextStart: string, nextPeriod: MembershipPeriod) {
     if (!nextStart || nextPeriod === "직접 입력") return;
-    setEnd(addDaysToDateString(nextStart, PERIOD_DAYS[nextPeriod] - 1));
+    setEnd(addMonthsMinusOneDay(nextStart, PERIOD_MONTHS[nextPeriod]));
   }
 
   function handleStartChange(nextStart: string) {
@@ -320,13 +327,13 @@ export default function RefundCalculator() {
                   </div>
                 </div>
                 <div>
-                  <div className="result-label">정상가 기준 1일 단가</div>
+                  <div className="result-label">실결제액 기준 1일 단가</div>
                   <div className="font-medium">
                     {computed ? formatWon(computed.perDay) : "-"}
                   </div>
                 </div>
                 <div>
-                  <div className="result-label">정상가 기준 이용금액</div>
+                  <div className="result-label">실결제액 기준 이용금액</div>
                   <div className="font-medium">
                     {computed ? formatWon(computed.usedAmount) : "-"}
                   </div>
