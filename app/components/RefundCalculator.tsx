@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   addMonthsMinusOneDay,
+  calculateUsageDays,
   daysBetweenExclusive,
   daysBetweenInclusive,
   formatWon,
@@ -60,9 +61,9 @@ export default function RefundCalculator() {
       ? Math.max(0, daysBetweenExclusive(originalEnd, e))
       : 0;
     const adjustedEndDate = end;
-    const calculatedRemainingDays = Math.max(0, daysBetweenExclusive(r, e));
-    const remainingDays = Math.min(totalDays, calculatedRemainingDays);
-    const usedDays = Math.max(0, totalDays - remainingDays);
+    const usage = calculateUsageDays(start, request, totalDays);
+    if (!usage) return null;
+    const { usedDays, remainingDays } = usage;
     const perDay = paid / totalDays;
     const usedAmount = perDay * usedDays;
     const penalty = (paid * penaltyRate) / 100;

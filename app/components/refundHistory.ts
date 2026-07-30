@@ -1,3 +1,5 @@
+import { calculateUsageDays } from "./utils";
+
 export type MembershipPeriod = "1개월" | "3개월" | "6개월" | "12개월" | "직접 입력";
 
 export type RefundHistoryItem = {
@@ -50,28 +52,44 @@ export function normalizeRefundHistoryItem(
   const endDate = asString(item.endDate);
   const originalEndDate = asString(item.originalEndDate) || endDate;
   const adjustedEndDate = asString(item.adjustedEndDate) || endDate;
+  const startDate = asString(item.startDate);
+  const requestDate = asString(item.requestDate);
+  const totalDays = asNumber(item.totalDays);
+  const paid = asNumber(item.paid);
+  const penaltyRate = item.penaltyRate === undefined ? 10 : asNumber(item.penaltyRate);
+  const cardFee = asNumber(item.cardFee);
+  const usage = calculateUsageDays(startDate, requestDate, totalDays);
+  const usedDays = usage?.usedDays ?? asNumber(item.usedDays);
+  const remainingDays = usage?.remainingDays ?? asNumber(item.remainingDays);
+  const perDay = totalDays > 0 ? paid / totalDays : asNumber(item.perDay);
+  const usedAmount = perDay * usedDays;
+  const penalty = (paid * penaltyRate) / 100;
+  const refund = Math.max(
+    0,
+    Math.floor(paid - usedAmount - penalty - cardFee),
+  );
 
   return {
     id: asString(item.id) || `legacy-${index}-${Date.now()}`,
     name: asString(item.name),
     periodType: asPeriod(item.periodType),
-    startDate: asString(item.startDate),
+    startDate,
     endDate,
-    requestDate: asString(item.requestDate),
+    requestDate,
     fullPrice: asNumber(item.fullPrice),
-    paid: asNumber(item.paid),
-    penaltyRate: item.penaltyRate === undefined ? 10 : asNumber(item.penaltyRate),
-    cardFee: asNumber(item.cardFee),
-    totalDays: asNumber(item.totalDays),
+    paid,
+    penaltyRate,
+    cardFee,
+    totalDays,
     originalEndDate,
     holdingDays: Math.max(0, asNumber(item.holdingDays)),
     adjustedEndDate,
-    usedDays: asNumber(item.usedDays),
-    remainingDays: asNumber(item.remainingDays),
-    perDay: asNumber(item.perDay),
-    usedAmount: asNumber(item.usedAmount),
-    penalty: asNumber(item.penalty),
-    refund: Math.floor(asNumber(item.refund)),
+    usedDays,
+    remainingDays,
+    perDay,
+    usedAmount,
+    penalty,
+    refund,
     savedAt: asString(item.savedAt),
   };
 }

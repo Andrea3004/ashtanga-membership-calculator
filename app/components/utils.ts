@@ -6,16 +6,36 @@ export function parseLocalDate(dateStr: string | undefined) {
 
 export function daysBetweenInclusive(start: Date, end: Date) {
   const msPerDay = 1000 * 60 * 60 * 24;
-  const s = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-  const e = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+  const s = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const e = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
   return Math.floor((e - s) / msPerDay) + 1;
 }
 
 export function daysBetweenExclusive(start: Date, end: Date) {
   const msPerDay = 1000 * 60 * 60 * 24;
-  const s = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-  const e = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+  const s = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const e = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
   return Math.floor((e - s) / msPerDay);
+}
+
+export function calculateUsageDays(
+  startDate: string,
+  requestDate: string,
+  totalDays: number,
+) {
+  const start = parseLocalDate(startDate);
+  const request = parseLocalDate(requestDate);
+  if (!start || !request || totalDays <= 0) return null;
+
+  const usedDays = Math.min(
+    totalDays,
+    Math.max(0, daysBetweenExclusive(start, request)),
+  );
+
+  return {
+    usedDays,
+    remainingDays: totalDays - usedDays,
+  };
 }
 
 export function formatWon(amount: number) {
